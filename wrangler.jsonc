@@ -7,11 +7,11 @@
 	"preview_urls": false,
 	// Domain binding uses Worker ROUTES, never a Worker custom domain:
 	// DNS for durandom.de is owned by orrery, and a custom domain would write DNS records.
-	// Enable at cut-over, after orrery has set the proxied DNS records for durandom.de and www.
-	// "routes": [
-	// 	{ "pattern": "durandom.de/*", "zone_name": "durandom.de" },
-	// 	{ "pattern": "www.durandom.de/*", "zone_name": "durandom.de" }
-	// ],
+	// The routes attach to orrery's existing proxied records for durandom.de and www.
+	"routes": [
+		{ "pattern": "durandom.de/*", "zone_name": "durandom.de" },
+		{ "pattern": "www.durandom.de/*", "zone_name": "durandom.de" }
+	],
 	"assets": {
 		"directory": "./build"
 	}

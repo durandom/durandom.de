@@ -34,7 +34,7 @@ npm run preview:worker  # build, then serve through the Worker locally (wrangler
 | `src/grid.ts` | Pure image → luminance grid sampling (box filter, rounded mask, normalize). |
 | `src/field.ts` | The hex-dump field: boot, settle, stir, glyph atlas, dirty-cell drawing. |
 | `src/main.ts` | DOM wiring: sizing, avatar placement, pointer, visibility, reduced motion. |
-| `public/avatar.jpg` | Avatar, downscaled to 320 px from `assets/durandom_rounded.jpeg`. |
+| `public/avatar.jpg` | Avatar, 320 px (downscaled from the 460 px original). |
 
 ## Behaviour contract
 
@@ -43,23 +43,28 @@ npm run preview:worker  # build, then serve through the Worker locally (wrangler
 - The animation stops while the tab is hidden.
 - Transfer budget: under 100 KB excluding the avatar (currently about 5 KB gzipped).
 
-To regenerate the avatar:
+To replace the avatar, downscale the new source image into place:
 
 ```sh
-magick assets/durandom_rounded.jpeg -resize 320x320 -strip -quality 82 public/avatar.jpg
+magick <source.jpeg> -resize 320x320 -strip -quality 82 public/avatar.jpg
 ```
 
 ## Deploy
 
-CI (`.github/workflows/website.yml`) runs `npm ci`, test, check and build on every push
-and PR. On push to `main` (or manual dispatch) it deploys with `cloudflare/wrangler-action`.
-It needs the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+Deploys are **local only**. CI (`.github/workflows/website.yml`) runs `npm ci`, test,
+check and build on every push and PR, and never deploys. There are no GitHub secrets.
 
-Manual deploy:
+Deploy from a shell where direnv has loaded `.envrc`:
 
 ```sh
+direnv allow       # once, after reviewing .envrc
 npm run deploy     # npm run build && wrangler deploy
 ```
+
+`.envrc` holds only `use vega durandom-de`. It exports `CLOUDFLARE_API_TOKEN` from vega
+secrets (tool `durandom-de`). The token needs **Workers Scripts Edit** and
+**Workers Routes Edit** on account `9f8d10b397a50cbce66cea20148fa14f`. The account id
+itself comes from `wrangler.jsonc`.
 
 The Worker is `durandom-de` (see `wrangler.jsonc`). It serves `build/` as static assets.
 `workers_dev` and `preview_urls` are off, so the Worker has no `*.workers.dev` URL.

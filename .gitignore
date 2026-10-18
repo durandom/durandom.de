@@ -4,3 +4,6 @@ build/
 .env
 .env.*
 .DS_Store
+
+# Tracked on purpose (overrides a global ignore): holds no values, only "use vega durandom-de".
+!.envrc

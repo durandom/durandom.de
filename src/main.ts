@@ -1,10 +1,11 @@
 import './style.css';
 import { Field, SETTLED, metricsFor } from './field.ts';
 import { normalize, sampleLuminance } from './grid.ts';
+import { attachScramble } from './scramble.ts';
 
 /** Corner radius of the avatar, as a fraction of its side. Keep in sync with .avatar img in style.css. */
 const AVATAR_RADIUS = 0.1;
-const STIR_RADIUS = 96;
+const STIR_RADIUS = 18;
 
 const canvas = document.querySelector<HTMLCanvasElement>('#noise');
 const img = document.querySelector<HTMLImageElement>('.avatar img');
@@ -106,6 +107,9 @@ function start(canvas: HTMLCanvasElement, image: HTMLImageElement): void {
     { passive: true },
   );
 }
+
+const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+for (const a of document.querySelectorAll<HTMLAnchorElement>('.links a')) attachScramble(a, reduced, canHover);
 
 if (canvas && img) {
   const go = () => start(canvas, img);

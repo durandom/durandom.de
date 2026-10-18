@@ -1,0 +1,178 @@
+:root {
+  --bg: #07090a;
+  --fg: #e8fff0;
+  --accent: #3cc882;
+  --dim: #6f8f80;
+  --panel: rgb(7 9 10 / 0.82);
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  overflow-x: hidden;
+}
+
+#noise {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 16px;
+  text-align: center;
+}
+
+.avatar {
+  margin: 0;
+  width: min(72vw, 44vh, 380px);
+  aspect-ratio: 1;
+}
+
+.avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 10%; /* keep in sync with AVATAR_RADIUS in main.ts */
+}
+
+h1,
+.pun {
+  margin: 0;
+  padding: 0.1em 0.5em;
+  background: var(--panel);
+}
+
+h1 {
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.pun {
+  color: var(--dim);
+  font-size: 0.9rem;
+}
+
+.pun span:first-child,
+.pun span:last-child {
+  color: var(--accent);
+}
+
+.links {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+  width: min(100%, 22rem);
+}
+
+.links a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgb(60 200 130 / 0.45);
+  background: var(--panel);
+  color: var(--fg);
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+
+.links a:hover,
+.links a:focus-visible {
+  border-color: var(--accent);
+  background: rgb(20 60 42 / 0.9);
+  outline: none;
+}
+
+.links .label {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.links .label::before {
+  content: '> ';
+  content: '> ' / ''; /* decorative: hidden from screen readers where supported */
+  color: var(--accent);
+}
+
+.links .url {
+  color: var(--dim);
+  font-size: 0.75rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* JS running: the canvas draws the avatar, so hide the photo but keep its box for layout. */
+.live .avatar img {
+  opacity: 0;
+}
+
+/* Text rises out of the noise once it settles. */
+.live h1,
+.live .pun,
+.live .links li {
+  opacity: 0;
+  transform: translateY(1.2rem);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
+}
+
+.live.settled h1,
+.live.settled .pun,
+.live.settled .links li {
+  opacity: 1;
+  transform: none;
+}
+
+.live.settled .pun {
+  transition-delay: 0.1s;
+}
+.live.settled .links li:nth-child(1) {
+  transition-delay: 0.2s;
+}
+.live.settled .links li:nth-child(2) {
+  transition-delay: 0.3s;
+}
+.live.settled .links li:nth-child(3) {
+  transition-delay: 0.4s;
+}
+.live.settled .links li:nth-child(4) {
+  transition-delay: 0.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live h1,
+  .live .pun,
+  .live .links li {
+    transition: none;
+    transform: none;
+  }
+}

@@ -14,13 +14,24 @@ export const SETTLED = BOOT + SPREAD;
 const SCROLL_STEP = 0.035;
 const HEAT_HALF_LIFE = 0.6;
 
-/** Colour ramp for glyphs: dim teal through phosphor green to near white. */
+/**
+ * Colour ramp for glyphs: near black through dark and phosphor green to near white.
+ * Hex glyphs differ little in ink, so the colour carries most of the avatar's luminance.
+ */
 const BG = [7, 9, 10];
 const STOPS: Array<[number, number[]]> = [
-  [0, [16, 40, 34]],
-  [0.55, [60, 200, 130]],
-  [1, [232, 255, 240]],
+  [0, [10, 18, 15]],
+  [0.15, [18, 70, 45]],
+  [0.55, [50, 165, 100]],
+  [0.8, [130, 230, 160]],
+  [1, [245, 255, 248]],
 ];
+
+/** Resting level range of noise outside the avatar: dim, so the avatar silhouette stands out. */
+const BG_MIN = 0.02;
+const BG_RANGE = 0.04;
+/** Darkest level an avatar cell rests at: just above the background, so dark areas keep the shape. */
+const AVATAR_FLOOR = 0.08;
 
 function rampColor(t: number): string {
   for (let s = 1; s < STOPS.length; s++) {
@@ -117,7 +128,7 @@ export class Field {
     for (let i = 0; i < n; i++) {
       this.glyph[i] = (Math.random() * BLANK) | 0;
       this.level[i] = 0.25 + Math.random() * 0.6;
-      this.bgLevel[i] = 0.03 + Math.random() * 0.1;
+      this.bgLevel[i] = BG_MIN + Math.random() * BG_RANGE;
       this.settleAt[i] = BOOT + Math.random() * SPREAD;
     }
     this.ctx.fillStyle = BACKGROUND;
@@ -185,7 +196,7 @@ export class Field {
 
   private restLevel(i: number): number {
     const a = this.avatar[i];
-    return a === OUTSIDE ? this.bgLevel[i] : 0.06 + 0.94 * a;
+    return a === OUTSIDE ? this.bgLevel[i] : AVATAR_FLOOR + (1 - AVATAR_FLOOR) * a;
   }
 
   private restGlyph(i: number): void {
@@ -234,7 +245,7 @@ export class Field {
         if (t - dt < this.settleAt[i]) {
           this.restGlyph(i); // just settled: leave the noise glyph behind
         } else if (Math.random() < (outside ? bgFlicker : avatarFlicker)) {
-          if (outside) this.bgLevel[i] = 0.03 + Math.random() * 0.1;
+          if (outside) this.bgLevel[i] = BG_MIN + Math.random() * BG_RANGE;
           this.restGlyph(i);
         }
         this.level[i] += (this.restLevel(i) - this.level[i]) * ease;

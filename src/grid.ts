@@ -70,3 +70,35 @@ export function normalize(lum: Float32Array, lo = 0.02, hi = 0.98, gamma = 1): F
   }
   return out;
 }
+
+/**
+ * Unsharp mask on a cols × rows luminance grid: v + amount · (v − box blur of radius r).
+ * Boosts edges (glasses frame, nose outline) that box-filter downsampling smears away.
+ * The blur averages inside cells only, so the mask border does not bleed in. OUTSIDE cells stay OUTSIDE.
+ * Results may leave 0..1; normalize clamps them.
+ */
+export function sharpen(lum: Float32Array, cols: number, rows: number, amount = 1, radius = 1): Float32Array {
+  const out = new Float32Array(lum.length);
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const i = row * cols + col;
+      const v = lum[i];
+      if (v === OUTSIDE) {
+        out[i] = OUTSIDE;
+        continue;
+      }
+      let sum = 0;
+      let n = 0;
+      for (let y = Math.max(0, row - radius); y <= Math.min(rows - 1, row + radius); y++) {
+        for (let x = Math.max(0, col - radius); x <= Math.min(cols - 1, col + radius); x++) {
+          const w = lum[y * cols + x];
+          if (w === OUTSIDE) continue;
+          sum += w;
+          n++;
+        }
+      }
+      out[i] = v + amount * (v - sum / n);
+    }
+  }
+  return out;
+}

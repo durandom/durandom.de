@@ -5,6 +5,8 @@ import { attachScramble } from './scramble.ts';
 
 /** Corner radius of the avatar, as a fraction of its side. Keep in sync with .avatar img in style.css. */
 const AVATAR_RADIUS = 0.1;
+/** Fraction trimmed from each side of avatar.jpg: drops its light 1px edge and white rounded corners. */
+const AVATAR_CROP = 0.03;
 const STIR_RADIUS = 18;
 /** Unsharp mask on the avatar grid, so the glasses frame and nose outline survive downsampling. */
 const SHARPEN_AMOUNT = 1.5;
@@ -38,7 +40,7 @@ function start(canvas: HTMLCanvasElement, image: HTMLImageElement): void {
     const row0 = Math.round(rect.top / h);
     const cols = Math.max(1, Math.round(rect.right / w) - col0);
     const rows = Math.max(1, Math.round(rect.bottom / h) - row0);
-    const lum = sampleLuminance(pixels.data, pixels.width, pixels.height, cols, rows, AVATAR_RADIUS);
+    const lum = sampleLuminance(pixels.data, pixels.width, pixels.height, cols, rows, AVATAR_RADIUS, AVATAR_CROP);
     const edged = sharpen(lum, cols, rows, SHARPEN_AMOUNT, SHARPEN_RADIUS);
     field.setAvatar(normalize(edged, 0.03, 0.97, 0.8), cols, rows, col0, row0);
   }

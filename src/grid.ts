@@ -19,6 +19,8 @@ export function luminance(r: number, g: number, b: number): number {
  * Box-filters an RGBA image down to a cols × rows grid of luminance values.
  * Cells whose centre falls outside the rounded mask get OUTSIDE.
  * Cells need not be square: each cell maps to its own box in the image.
+ * crop trims that fraction of the image from each side before sampling (to drop a light border);
+ * the mask stays on the grid, so it still matches the visible avatar box.
  */
 export function sampleLuminance(
   pixels: ArrayLike<number>,
@@ -27,19 +29,24 @@ export function sampleLuminance(
   cols: number,
   rows: number,
   cornerRadius = 0,
+  crop = 0,
 ): Float32Array {
   const out = new Float32Array(cols * rows);
+  const left = crop * width;
+  const top = crop * height;
+  const w = width - 2 * left;
+  const h = height - 2 * top;
   for (let row = 0; row < rows; row++) {
-    const y0 = Math.floor((row * height) / rows);
-    const y1 = Math.max(y0 + 1, Math.floor(((row + 1) * height) / rows));
+    const y0 = Math.floor(top + (row * h) / rows);
+    const y1 = Math.max(y0 + 1, Math.floor(top + ((row + 1) * h) / rows));
     for (let col = 0; col < cols; col++) {
       const i = row * cols + col;
       if (!insideRoundedRect((col + 0.5) / cols, (row + 0.5) / rows, cornerRadius)) {
         out[i] = OUTSIDE;
         continue;
       }
-      const x0 = Math.floor((col * width) / cols);
-      const x1 = Math.max(x0 + 1, Math.floor(((col + 1) * width) / cols));
+      const x0 = Math.floor(left + (col * w) / cols);
+      const x1 = Math.max(x0 + 1, Math.floor(left + ((col + 1) * w) / cols));
       let sum = 0;
       for (let y = y0; y < y1; y++) {
         for (let x = x0; x < x1; x++) {

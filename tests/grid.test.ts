@@ -89,3 +89,20 @@ test('sharpen with amount 0 is the identity', () => {
   const lum = new Float32Array([0.1, 0.9, 0.3, 0.6]);
   assert.deepEqual(Array.from(sharpen(lum, 2, 2, 0)), Array.from(lum));
 });
+
+test('sampleLuminance crop drops a light border', () => {
+  // 20×20 black image with a 1px white frame.
+  const px = image(20, 20, (x, y) => (x === 0 || y === 0 || x === 19 || y === 19 ? 255 : 0));
+  const uncropped = sampleLuminance(px, 20, 20, 4, 4);
+  assert.ok(uncropped[0] > 0, 'border bleeds into the edge cells without crop');
+  const cropped = sampleLuminance(px, 20, 20, 4, 4, 0, 0.05);
+  assert.ok(cropped.every((v) => v === 0), 'a 5% crop removes the 1px frame');
+});
+
+test('sampleLuminance crop samples only the inner region and keeps the mask on the grid', () => {
+  // Left 25% white, rest black: a 25% crop leaves only black.
+  const px = image(8, 8, (x) => (x < 2 ? 255 : 0));
+  const grid = sampleLuminance(px, 8, 8, 4, 4, 0.5, 0.25);
+  assert.equal(grid[0], OUTSIDE);
+  assert.equal(grid[5], 0);
+});
